@@ -1,0 +1,47 @@
+FROM ubuntu:22.04
+
+ARG UID=1000
+ARG GID=1000
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+
+# Install required dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    cmake \
+    git \
+    libjson-c-dev \
+    lua5.1 \
+    lua5.1-dev \
+    wget \
+    pkg-config \
+    libssl-dev \
+    libreadline-dev
+
+
+RUN groupadd -g $GID user && \
+    useradd --create-home --gid $GID --uid $UID user
+
+
+RUN chown -R user: /home/user
+
+WORKDIR /var/build/
+RUN git clone https://git.openwrt.org/project/libubox.git /var/build/libubox && \
+    cd /var/build/libubox && \
+    cmake -B build && \
+    cmake --build build && \
+    cmake --install build && \
+    cd .. && rm -rf libubox
+
+RUN git clone https://git.openwrt.org/project/ubus.git /var/build/ubus && \
+    cd /var/build/ubus && \
+    mkdir build && cd build && \
+    cmake .. && \
+    make && \
+    make install && \
+    cd .. && rm -rf ubus
+
+
+ENV LD_LIBRARY_PATH=/usr/local/lib

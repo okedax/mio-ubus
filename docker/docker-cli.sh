@@ -1,0 +1,1 @@
+docker run --rm -it -v "$(pwd):/var/build" -u $(id -u):$(id -g) lib-ubus-builder bash
